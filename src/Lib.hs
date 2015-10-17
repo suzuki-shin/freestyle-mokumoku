@@ -40,6 +40,7 @@ Model
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User
   name Text
+  age Int
   deriving Show Generic
 |]
 
@@ -73,6 +74,7 @@ run = S.scotty 3000 $ do
     user <- getUser userId
     S.json user
 
+  -- curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"userName":"hoge", "userAge":20}' localhost:3000
   S.post "/user" $ do
     u <- S.jsonData :: S.ActionM User
     userId <- insertUser u
