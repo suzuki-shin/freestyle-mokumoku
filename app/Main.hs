@@ -1,6 +1,6 @@
 module Main where
 
-import qualified Lib
+import qualified Controller
 
 main :: IO ()
-main = Lib.run
+main = Controller.run
