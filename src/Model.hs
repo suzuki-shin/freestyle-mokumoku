@@ -22,27 +22,21 @@ import           Control.Monad.Logger                  (NoLoggingT)
 import           Control.Monad.Trans.Control           (MonadBaseControl)
 import           Control.Monad.Trans.Resource.Internal (ResourceT)
 import qualified Data.Aeson                            as A
-import           Data.Foldable                         (foldl')
-import qualified Data.Map.Strict                       as M
-import           Data.Maybe                            (fromJust)
-import           Data.Text.Lazy                        (Text, append)
-import qualified Data.Text.Lazy
+import           Data.Text.Lazy                        (Text)
 import qualified Database.Persist                      as P
 import qualified Database.Persist.Sqlite               as P
 import           Database.Persist.TH
 import           GHC.Generics
 import           GHC.Int                               (Int64)
-import qualified Network.Wai.Middleware.RequestLogger  as L
-import Model.Type
+import           Model.Type
 
-{- |
-Model
--}
+
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User
   name Text
   age Int
   skills [Skill]
+  UniqueUser name
   deriving Show Generic
 |]
 
@@ -61,7 +55,3 @@ insertUser k = runDB $ P.insert k
 
 getUser :: MonadIO m => Int64 -> m (Maybe User)
 getUser kid = runDB $ P.get (P.toSqlKey kid :: UserId)
-
-
--- getWeapons = runDB $ P.selectList [P.Filter :: ]
-

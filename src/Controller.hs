@@ -1,14 +1,9 @@
-{-# LANGUAGE DeriveGeneric              #-}
-{-# LANGUAGE EmptyDataDecls             #-}
-{-# LANGUAGE FlexibleContexts           #-}
-{-# LANGUAGE GADTs                      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE QuasiQuotes                #-}
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE TypeFamilies               #-}
-{-# LANGUAGE TypeSynonymInstances       #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE TypeSynonymInstances  #-}
 
 module Controller
     ( run
@@ -21,22 +16,10 @@ import           Control.Monad.Trans.Control           (MonadBaseControl)
 import           Control.Monad.Trans.Resource.Internal (ResourceT)
 import qualified Data.Aeson                            as A
 import           Data.Foldable                         (foldl')
-import qualified Data.Map.Strict                       as M
-import           Data.Maybe                            (fromJust)
-import           Data.Text.Lazy                        (Text, append)
-import qualified Data.Text.Lazy
--- import qualified Database.Persist                      as P
--- import qualified Database.Persist.Sqlite               as P
--- import           Database.Persist.TH
-import           GHC.Generics
-import           GHC.Int                               (Int64)
+import           Model
 import qualified Network.Wai.Middleware.RequestLogger  as L
 import qualified Web.Scotty                            as S
-import Model
 
-{- |
-Controller
--}
 run :: IO ()
 run = S.scotty 3000 $ do
   S.middleware L.logStdoutDev
