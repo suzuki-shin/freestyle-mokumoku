@@ -35,6 +35,17 @@ run = S.scotty 3000 $ do
     userId <- insertUser u
     S.json userId
 
+  -- curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"chatBody":"わーい", "chatUserId":1}' localhost:3000/chat
+  S.post "/chat" $ do
+    u <- S.jsonData :: S.ActionM Chat
+    chatId <- insertChat u
+    S.json chatId
+
+  S.get "/chat/:id" $ do
+    userId <- S.param "id"
+    chats <- selectChat userId
+    S.json $ chats
+
   S.notFound $
     S.text "there is no such route."
 
