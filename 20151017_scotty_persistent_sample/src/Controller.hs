@@ -15,7 +15,6 @@ import           Control.Monad.Logger                  (NoLoggingT)
 import           Control.Monad.Trans.Control           (MonadBaseControl)
 import           Control.Monad.Trans.Resource.Internal (ResourceT)
 import qualified Data.Aeson                            as A
-import           Data.Foldable                         (foldl')
 import           Model
 import qualified Network.Wai.Middleware.RequestLogger  as L
 import qualified Web.Scotty                            as S
