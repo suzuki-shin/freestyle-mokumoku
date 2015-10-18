@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE EmptyDataDecls             #-}
 {-# LANGUAGE FlexibleContexts           #-}
+{-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
@@ -30,32 +31,25 @@ import           Database.Persist                      ((==.))
 import qualified Database.Persist                      as P
 import qualified Database.Persist.Sqlite               as P
 import           Database.Persist.TH
-import           GHC.Generics
 import           GHC.Int                               (Int64)
 import           Model.Type
 
 -- | User型をChat型を定義しています。これらに対応するテーブルが自動で作られます。
 -- User型はnameとageとskillsというプロパティを持っていて、それぞれの値はHaskellのText型、Int型、Skill型（Model/Type.hsで定義している）のリストに型付けされています。
 -- User型はnameでユニーク制約がついています。
+-- また、型名の隣に'json'と書くことによって、JSONへの自動変換とJSONからの自動変換ができるようになっています。
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
-User
+User json
   name Text
   age Int
   skills [Skill]
   UniqueUser name
-  deriving Show Generic
-Chat
+  deriving Show
+Chat json
   body Text
   userId UserId
-  deriving Show Generic
+  deriving Show
 |]
-
-instance A.FromJSON User -- この記述でUser型はJSONから自動変換できます
-instance A.ToJSON User -- この記述でUser型はJSONに自動変換できます
-
-instance A.FromJSON Chat -- JSONから自動変換できるようになります。
-instance A.ToJSON Chat -- JSONへ自動変換できるようになります。
-
 
 runDB :: MonadIO m => P.SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a
 runDB query = liftIO $ P.runSqlite "db.sqlite" $ do

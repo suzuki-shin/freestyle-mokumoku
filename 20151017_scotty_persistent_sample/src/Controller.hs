@@ -45,7 +45,7 @@ run = S.scotty 3000 $ do
   S.get "/chat/:id" $ do
     userId <- S.param "id"
     chats <- selectChat userId
-    S.json $ chats
+    S.json chats
 
   S.notFound $
     S.text "there is no such route."
