@@ -6,9 +6,12 @@
 プログラムの中身は説明のために作ったもので、機能自体に意味はありません。
 [Persistent](http://www.stackage.org/package/persistent)（データ永続化ライブラリ）と[Scotty](https://hackage.haskell.org/package/scotty)（ウェブフレームワーク）で作っています。DBにはSQLiteを使っています。
 
+LTで伝えたかったことは、HaskellでPersistentとScottyを使うと少ない記述量でJSONをやり取りするAPIが作れるよ、ということでした。
+
 ### インストール
 ```
-cd 20151017_scotty_persistent_sample
+git clone https://github.com/suzuki-shin/freestyle-mokumoku.git
+cd freestyle-mokumoku/20151017_scotty_persistent_sample
 stack build
 ```
 stack自体のinstallは https://github.com/commercialhaskell/stack#how-to-install から。
