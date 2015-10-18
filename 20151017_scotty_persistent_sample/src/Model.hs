@@ -11,12 +11,12 @@
 {-# LANGUAGE TypeSynonymInstances       #-}
 
 module Model
-    ( insertUser
-    , getUser
-    , insertChat
-    , selectChat
-    , User(..)
-    , Chat(..)
+    ( insertUser -- ここで
+    , getUser    -- 記述されている
+    , insertChat -- 関数や型が
+    , selectChat -- エクスポートされます。
+    , User(..)   -- 逆にここに書かれていないものは
+    , Chat(..)   -- このモジュールの外では参照できません。
     ) where
 
 import           Control.Applicative                   ((<$>))
@@ -34,7 +34,9 @@ import           GHC.Generics
 import           GHC.Int                               (Int64)
 import           Model.Type
 
-
+-- | User型をChat型を定義しています。これらに対応するテーブルが自動で作られます。
+-- User型はnameとageとskillsというプロパティを持っていて、それぞれの値はHaskellのText型、Int型、Skill型（Model/Type.hsで定義している）のリストに型付けされています。
+-- User型はnameでユニーク制約がついています。
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User
   name Text
@@ -48,11 +50,11 @@ Chat
   deriving Show Generic
 |]
 
-instance A.FromJSON User
-instance A.ToJSON User
+instance A.FromJSON User -- この記述でUser型はJSONから自動変換できます
+instance A.ToJSON User -- この記述でUser型はJSONに自動変換できます
 
-instance A.FromJSON Chat
-instance A.ToJSON Chat
+instance A.FromJSON Chat -- JSONから自動変換できるようになります。
+instance A.ToJSON Chat -- JSONへ自動変換できるようになります。
 
 
 runDB :: MonadIO m => P.SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a
@@ -60,19 +62,19 @@ runDB query = liftIO $ P.runSqlite "db.sqlite" $ do
   P.runMigration migrateAll
   query
 
-
+-- | User型の値を受け取りDBにインサートしてUserIdを返す
 insertUser :: MonadIO m => User -> m UserId
 insertUser = runDB . P.insert
 
-
+-- | Int64型のUserIdを受け取り、User型の値を返す
 getUser :: MonadIO m => Int64 -> m (Maybe User)
 getUser uid = runDB $ P.get (P.toSqlKey uid :: UserId)
 
-
+-- | Chat型の値を受け取りDBにインサートしてChatIdを返す
 insertChat :: MonadIO m => Chat -> m ChatId
 insertChat = runDB . P.insert
 
-
+-- | Int64型のUserIdを受け取り、そのUserのChat型の値のリストを返す
 selectChat :: MonadIO m => Int64 -> m [Chat]
 selectChat uid = do
   chats <- runDB $ P.selectList ([ChatUserId ==. P.toSqlKey uid]::[P.Filter Chat]) []
