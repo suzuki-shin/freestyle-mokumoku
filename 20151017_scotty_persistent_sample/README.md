@@ -8,7 +8,8 @@
 
 ### インストール
 ```
-cd 20151017_scotty_persistent_sample
+git clone https://github.com/suzuki-shin/freestyle-mokumoku.git
+cd freestyle-mokumoku/20151017_scotty_persistent_sample
 stack build
 ```
 stack自体のinstallは https://github.com/commercialhaskell/stack#how-to-install から。
