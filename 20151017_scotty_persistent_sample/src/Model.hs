@@ -10,8 +10,13 @@
 {-# LANGUAGE TypeFamilies               #-}
 {-# LANGUAGE TypeSynonymInstances       #-}
 
-module Lib
-    ( run
+module Model
+    ( insertUser
+    , getUser
+    , insertChat
+    , selectChat
+    , User(..)
+    , Chat(..)
     ) where
 
 import           Control.Applicative                   ((<$>))
@@ -20,32 +25,34 @@ import           Control.Monad.Logger                  (NoLoggingT)
 import           Control.Monad.Trans.Control           (MonadBaseControl)
 import           Control.Monad.Trans.Resource.Internal (ResourceT)
 import qualified Data.Aeson                            as A
-import           Data.Foldable                         (foldl')
-import qualified Data.Map.Strict                       as M
-import           Data.Maybe                            (fromJust)
-import           Data.Text.Lazy                        (Text, append)
-import qualified Data.Text.Lazy
+import           Data.Text.Lazy                        (Text)
+import           Database.Persist                      ((==.))
 import qualified Database.Persist                      as P
 import qualified Database.Persist.Sqlite               as P
 import           Database.Persist.TH
 import           GHC.Generics
 import           GHC.Int                               (Int64)
-import qualified Network.Wai.Middleware.RequestLogger  as L
-import qualified Web.Scotty                            as S
+import           Model.Type
 
 
-{- |
-Model
--}
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User
   name Text
   age Int
+  skills [Skill]
+  UniqueUser name
+  deriving Show Generic
+Chat
+  body Text
+  userId UserId
   deriving Show Generic
 |]
 
 instance A.FromJSON User
 instance A.ToJSON User
+
+instance A.FromJSON Chat
+instance A.ToJSON Chat
 
 
 runDB :: MonadIO m => P.SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a
@@ -55,31 +62,18 @@ runDB query = liftIO $ P.runSqlite "db.sqlite" $ do
 
 
 insertUser :: MonadIO m => User -> m UserId
-insertUser k = runDB $ P.insert k
+insertUser = runDB . P.insert
 
 
 getUser :: MonadIO m => Int64 -> m (Maybe User)
-getUser kid = runDB $ P.get (P.toSqlKey kid :: UserId)
+getUser uid = runDB $ P.get (P.toSqlKey uid :: UserId)
 
 
-{- |
-Controller
--}
-run :: IO ()
-run = S.scotty 3000 $ do
-  S.middleware L.logStdoutDev
+insertChat :: MonadIO m => Chat -> m ChatId
+insertChat = runDB . P.insert
 
-  S.get "/user/:id" $ do
-    userId <- S.param "id"
-    user <- getUser userId
-    S.json user
 
-  -- curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"userName":"hoge", "userAge":20}' localhost:3000
-  S.post "/user" $ do
-    u <- S.jsonData :: S.ActionM User
-    userId <- insertUser u
-    S.json userId
-
-  S.notFound $
-    S.text "there is no such route."
-
+selectChat :: MonadIO m => Int64 -> m [Chat]
+selectChat uid = do
+  chats <- runDB $ P.selectList ([ChatUserId ==. P.toSqlKey uid]::[P.Filter Chat]) []
+  return $ map P.entityVal chats
