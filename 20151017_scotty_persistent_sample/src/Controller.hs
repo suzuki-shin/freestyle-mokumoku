@@ -23,7 +23,7 @@ run :: IO ()
 run = S.scotty 3000 $ do
   S.middleware L.logStdoutDev
 
-  -- curl "/user/1"
+  -- curl localhost:3000/user/1
   S.get "/user/:id" $ do
     userId <- S.param "id"
     user <- getUser userId
@@ -41,7 +41,7 @@ run = S.scotty 3000 $ do
     chatId <- insertChat u
     S.json chatId
 
-  -- curl "/chat/1"
+  -- curl localhost:3000/chat/1
   S.get "/chat/:id" $ do
     userId <- S.param "id"
     chats <- selectChat userId
