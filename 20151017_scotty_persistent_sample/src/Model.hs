@@ -16,6 +16,9 @@ module Model
     , getUser    -- 記述されている
     , insertChat -- 関数や型が
     , selectChat -- エクスポートされます。
+    , Todo(..)
+    , insertTodo
+    , selectTodo
     , User(..)   -- 逆にここに書かれていないものは
     , Chat(..)   -- このモジュールの外では参照できません。
     ) where
@@ -39,6 +42,10 @@ import           Model.Type
 -- User型はnameでユニーク制約がついています。
 -- また、型名の隣に'json'と書くことによって、JSONへの自動変換とJSONからの自動変換ができるようになっています。
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
+Todo json
+  title Text
+  completed Bool
+  deriving Show
 User json
   name Text
   age Int
@@ -73,3 +80,13 @@ selectChat :: MonadIO m => Int64 -> m [Chat]
 selectChat uid = do
   chats <- runDB $ P.selectList ([ChatUserId ==. P.toSqlKey uid]::[P.Filter Chat]) []
   return $ map P.entityVal chats
+
+
+insertTodo :: MonadIO m => Todo -> m TodoId
+insertTodo = runDB . P.insert
+
+
+selectTodo :: MonadIO m => m [Todo]
+selectTodo = do
+  todos <- runDB $ P.selectList ([]::[P.Filter Todo]) []
+  return $ map P.entityVal todos

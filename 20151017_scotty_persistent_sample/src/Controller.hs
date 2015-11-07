@@ -23,6 +23,17 @@ run :: IO ()
 run = S.scotty 3000 $ do
   S.middleware L.logStdoutDev
 
+
+  S.get "/todo" $ do
+    todos <- selectTodo
+    S.json todos
+
+  S.post "/todo" $ do
+    u <- S.jsonData :: S.ActionM Todo
+    todoId <- insertTodo u
+    S.json todoId
+
+
   -- curl "/user/1"
   S.get "/user/:id" $ do
     userId <- S.param "id"
